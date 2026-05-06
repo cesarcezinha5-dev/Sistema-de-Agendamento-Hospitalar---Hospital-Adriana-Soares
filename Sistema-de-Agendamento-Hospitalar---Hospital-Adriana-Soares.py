@@ -187,20 +187,24 @@ while True:
         nome = input("Nome completo: ")
         numero = input("Numero de telefone: ")
         email = input("E-mail: ")
+        print("Ótimo! Agora vamos escolher a especialidade para sua consulta.\n")
 
         especialidades = mostrar_especialidades()
         especialidade_escolhida = escolher_opcao(especialidades, "Digite o número da especialidade desejada: ")
         print(f"Você escolheu: {especialidade_escolhida}")
+        print("-" * 40)
 
         lista_medicos = mostrar_medicos()
         medico_escolhido = escolher_opcao(lista_medicos, "Digite o número do médico que deseja: ")
+        print("-" * 40)
 
         lista_datas = mostrar_datas()
         escolha_data = escolher_opcao(lista_datas, "Digite o número da data que deseja: ")
+        print("-" * 40)
 
         lista_horarios = horarios_disponiveis()
         escolha_horario = escolher_opcao(lista_horarios, "Digite o número do horário que deseja: ")
-        print()
+        print("-" * 40)
 
         print("Consulta agendada com sucesso!\n")
         resumo_agendamento(nome, especialidade_escolhida, medico_escolhido, escolha_data, escolha_horario, local)
@@ -221,7 +225,7 @@ while True:
             enviar_email_confirmacao(email, nome, especialidade_escolhida, medico_escolhido, escolha_data, escolha_horario, local)
             print("E-mail de confirmação enviado com sucesso!\n")
         except:
-            print("Não foi possível enviar o e-mail. Verifique as configurações.\n")
+            print("Não foi possível enviar o e-mail. Verifique se digitou o endereço corretamente.\n")
 
     elif menu == "2":
         if len(consultas) == 0:
