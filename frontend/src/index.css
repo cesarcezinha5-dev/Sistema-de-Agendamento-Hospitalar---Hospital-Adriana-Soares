@@ -1,0 +1,52 @@
+:root {
+  font-family: 'DM Sans', 'Segoe UI', sans-serif;
+  color: #5b4345;
+  background: #f5f8f7;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-optical-sizing: auto;
+  font-weight: 400;
+
+  --heading-font: 'Manrope', 'DM Sans', sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 3px solid rgba(153, 54, 62, .35);
+  outline-offset: 2px;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--heading-font);
+}
+
+#root {
+  min-height: 100vh;
+}
+
+::selection {
+  background: #eacdcf;
+  color: #4f2428;
+}
