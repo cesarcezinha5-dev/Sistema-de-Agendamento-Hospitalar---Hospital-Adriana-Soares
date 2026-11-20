@@ -245,6 +245,21 @@
   width: 37px;
 }
 
+.logout-button {
+  background: transparent;
+  border: 0;
+  color: #8a343c;
+  cursor: pointer;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 650;
+  padding: 8px 4px;
+}
+
+.logout-button:hover {
+  color: #55171d;
+}
+
 .mobile-brand {
   align-items: center;
   color: #553134;
@@ -928,6 +943,125 @@
   background-color: #f7f9f8;
   color: #b6aaab;
   cursor: not-allowed;
+}
+
+.account-summary {
+  background: #f7f9f8;
+  border: 1px solid #e8eeeb;
+  border-radius: 9px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-top: 18px;
+  padding: 13px 15px;
+}
+
+.account-summary strong {
+  color: #54393b;
+  font-size: 12px;
+}
+
+.account-summary span {
+  color: #8f8081;
+  font-size: 11px;
+}
+
+.auth-screen {
+  align-items: center;
+  background: #f5f8f6;
+  display: flex;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 24px;
+}
+
+.auth-card {
+  border: 1px solid #e7eeeb;
+  border-radius: 16px;
+  max-width: 430px;
+  padding: 34px;
+  width: 100%;
+}
+
+.auth-brand {
+  align-items: center;
+  display: flex;
+  gap: 11px;
+  margin-bottom: 30px;
+}
+
+.auth-card > .eyebrow {
+  margin-bottom: 8px;
+}
+
+.auth-card h1 {
+  color: #432326;
+  font-size: 25px;
+  margin: 0;
+}
+
+.auth-subtitle {
+  color: #938384;
+  font-size: 12px;
+  line-height: 1.6;
+  margin: 8px 0 22px;
+}
+
+.auth-switch {
+  background: #f3f6f4;
+  border-radius: 9px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  margin-bottom: 20px;
+  padding: 4px;
+}
+
+.auth-switch button {
+  background: transparent;
+  border: 0;
+  border-radius: 7px;
+  color: #817475;
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  min-height: 37px;
+}
+
+.auth-switch button.active {
+  background: #ffffff;
+  box-shadow: 0 1px 4px rgba(52, 33, 34, .1);
+  color: #7b1820;
+  font-weight: 700;
+}
+
+.auth-form {
+  display: grid;
+  gap: 15px;
+}
+
+.auth-form .field > span {
+  font-size: 11px;
+}
+
+.auth-form .field input {
+  font-size: 13px;
+  min-height: 44px;
+}
+
+.auth-submit {
+  justify-content: center;
+  margin-top: 3px;
+  width: 100%;
+}
+
+.auth-error {
+  background: #fff0f0;
+  border-radius: 7px;
+  color: #9c2c36;
+  font-size: 12px;
+  line-height: 1.5;
+  margin: 0;
+  padding: 10px 12px;
 }
 
 .full-field {

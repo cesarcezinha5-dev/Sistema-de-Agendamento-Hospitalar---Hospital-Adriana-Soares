@@ -1,5 +1,6 @@
 .env
 consultas.json
+usuarios.json
 __pycache__/
 frontend/node_modules/
 frontend/dist/

@@ -20,6 +20,18 @@ manipulação de arquivos e integração com envio de e-mails.
 
 A aplicação também possui uma interface responsiva em React. Ela permite visualizar os agendamentos, pesquisar e cancelar consultas, além de agendar uma nova consulta com horários ocupados atualizados. Os dados continuam salvos em `consultas.json`, e o envio de confirmação por e-mail usa as credenciais configuradas no arquivo `.env`.
 
+### Contas e privacidade
+
+Cada paciente cria uma conta com e-mail e senha para acessar a área de agendamentos. A API associa as consultas à conta autenticada e só permite que o próprio paciente as visualize ou cancele. As senhas são armazenadas como hashes em `usuarios.json`, arquivo ignorado pelo Git.
+
+Configure `FLASK_SECRET_KEY` no `.env` para manter as sessões válidas após reiniciar a API. Gere uma chave com:
+
+```bash
+python -c "import secrets; print(secrets.token_hex(32))"
+```
+
+Em produção, use HTTPS e configure `SESSION_COOKIE_SECURE=true`. Agendamentos antigos, sem conta associada, não são exibidos na área do paciente.
+
 ### Executar em desenvolvimento
 
 1. Instale as dependências Python na raiz do projeto:

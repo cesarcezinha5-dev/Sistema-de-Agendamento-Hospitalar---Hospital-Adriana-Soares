@@ -86,11 +86,24 @@ async function fetchDashboardData() {
   return { configData, appointmentsData }
 }
 
+async function fetchCurrentUser() {
+  const response = await fetch('/api/auth/me')
+  const data = await response.json()
+  if (response.status === 401) return null
+  if (!response.ok) throw new Error(data.erro || 'Não foi possível verificar sua conta.')
+  return data.usuario
+}
+
 function App() {
   const [page, setPage] = useState('inicio')
   const [config, setConfig] = useState(null)
   const [appointments, setAppointments] = useState([])
+  const [user, setUser] = useState(null)
   const [form, setForm] = useState(EMPTY_FORM)
+  const [authMode, setAuthMode] = useState('login')
+  const [authForm, setAuthForm] = useState({ nome: '', telefone: '', email: '', senha: '' })
+  const [authError, setAuthError] = useState('')
+  const [authSaving, setAuthSaving] = useState(false)
   const [availability, setAvailability] = useState({ key: '', times: [] })
   const [search, setSearch] = useState('')
   const [loading, setLoading] = useState(true)
@@ -145,8 +158,11 @@ function App() {
 
   useEffect(() => {
     let active = true
-    fetchDashboardData()
-      .then(({ configData, appointmentsData }) => {
+    fetchCurrentUser()
+      .then(async (currentUser) => {
+        if (!active || !currentUser) return
+        setUser(currentUser)
+        const { configData, appointmentsData } = await fetchDashboardData()
         if (active) {
           setConfig(configData)
           setAppointments(appointmentsData)
@@ -162,6 +178,45 @@ function App() {
       active = false
     }
   }, [])
+
+  async function submitAuth(event) {
+    event.preventDefault()
+    setAuthSaving(true)
+    setAuthError('')
+    try {
+      const response = await fetch(`/api/auth/${authMode === 'register' ? 'register' : 'login'}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(authForm),
+      })
+      const data = await response.json()
+      if (!response.ok) throw new Error(data.erro || 'Não foi possível acessar sua conta.')
+      setUser(data.usuario)
+      setError('')
+      setPage('inicio')
+      await loadData(false)
+    } catch (requestError) {
+      setAuthError(requestError.message || 'Não foi possível acessar sua conta.')
+    } finally {
+      setAuthSaving(false)
+    }
+  }
+
+  async function logout() {
+    try {
+      const response = await fetch('/api/auth/logout', { method: 'POST' })
+      if (!response.ok) throw new Error('Não foi possível sair da conta.')
+      setUser(null)
+      setAppointments([])
+      setForm(EMPTY_FORM)
+      setPage('inicio')
+      setAuthMode('login')
+      setAuthForm({ nome: '', telefone: '', email: user?.email ?? '', senha: '' })
+      setNotice(null)
+    } catch (requestError) {
+      setError(requestError.message || 'Não foi possível sair da conta.')
+    }
+  }
 
   useEffect(() => {
     if (!form.medico || !form.especialidade || !form.data) {
@@ -214,7 +269,12 @@ function App() {
       const response = await fetch('/api/appointments', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: JSON.stringify({
+          especialidade: form.especialidade,
+          medico: form.medico,
+          data: form.data,
+          horario: form.horario,
+        }),
       })
       const data = await response.json()
       if (!response.ok) throw new Error(data.erro || 'Não foi possível agendar a consulta.')
@@ -255,6 +315,97 @@ function App() {
     setPage('agendar')
   }
 
+  if (!loading && !user) {
+    return (
+      <main className="auth-screen">
+        <section className="auth-card card">
+          <div className="auth-brand">
+            <span className="brand-mark"><Icon name="heart" size={23} /></span>
+            <span className="brand-name">adriana<span>soares</span></span>
+          </div>
+          <p className="eyebrow">ÁREA DO PACIENTE</p>
+          <h1>{authMode === 'login' ? 'Acesse sua conta' : 'Crie sua conta'}</h1>
+          <p className="auth-subtitle">
+            {authMode === 'login'
+              ? 'Entre para consultar e gerenciar seus agendamentos.'
+              : 'Cadastre-se para agendar e acompanhar suas consultas.'}
+          </p>
+          <div className="auth-switch" role="group" aria-label="Tipo de acesso">
+            <button
+              type="button"
+              className={authMode === 'login' ? 'active' : ''}
+              onClick={() => { setAuthMode('login'); setAuthError('') }}
+            >
+              Entrar
+            </button>
+            <button
+              type="button"
+              className={authMode === 'register' ? 'active' : ''}
+              onClick={() => { setAuthMode('register'); setAuthError('') }}
+            >
+              Criar conta
+            </button>
+          </div>
+          <form className="auth-form" onSubmit={submitAuth}>
+            {error && <p className="auth-error" role="alert">{error} Confira se a API está em execução.</p>}
+            {authMode === 'register' && (
+              <>
+                <label className="field">
+                  <span>Nome completo</span>
+                  <input
+                    autoComplete="name"
+                    maxLength={120}
+                    required
+                    value={authForm.nome}
+                    onChange={(event) => setAuthForm({ ...authForm, nome: event.target.value })}
+                  />
+                </label>
+                <label className="field">
+                  <span>Telefone</span>
+                  <input
+                    autoComplete="tel"
+                    maxLength={30}
+                    required
+                    value={authForm.telefone}
+                    onChange={(event) => setAuthForm({ ...authForm, telefone: event.target.value })}
+                  />
+                </label>
+              </>
+            )}
+            <label className="field">
+              <span>E-mail</span>
+              <input
+                autoComplete="username"
+                maxLength={254}
+                required
+                type="email"
+                value={authForm.email}
+                onChange={(event) => setAuthForm({ ...authForm, email: event.target.value })}
+              />
+            </label>
+            <label className="field">
+              <span>Senha</span>
+              <input
+                autoComplete={authMode === 'login' ? 'current-password' : 'new-password'}
+                maxLength={128}
+                minLength={8}
+                required
+                type="password"
+                value={authForm.senha}
+                onChange={(event) => setAuthForm({ ...authForm, senha: event.target.value })}
+              />
+            </label>
+            {authError && <p className="auth-error" role="alert">{authError}</p>}
+            <button className="button button-primary auth-submit" disabled={authSaving} type="submit">
+              {authSaving ? 'Aguarde...' : authMode === 'login' ? 'Entrar' : 'Criar conta'}
+              <Icon name="arrow" size={17} />
+            </button>
+          </form>
+        </section>
+      </main>
+    )
+  }
+
   return (
     <div className="app-shell">
       <aside className="sidebar">
@@ -268,7 +419,7 @@ function App() {
             <Icon name="grid" /><span>Visão geral</span>
           </button>
           <button className={`nav-link ${page === 'agendamentos' ? 'active' : ''}`} onClick={() => setPage('agendamentos')}>
-            <Icon name="calendar" /><span>Agendamentos</span>
+            <Icon name="calendar" /><span>Meus agendamentos</span>
             <span className="nav-count">{appointments.length}</span>
           </button>
           <button className={`nav-link ${page === 'agendar' ? 'active' : ''}`} onClick={openBooking}>
@@ -293,8 +444,9 @@ function App() {
           <div className="breadcrumb"><span>Hospital</span><Icon name="chevron" size={15} /><strong>{page === 'inicio' ? 'Visão geral' : page === 'agendar' ? 'Agendar consulta' : 'Agendamentos'}</strong></div>
           <div className="topbar-profile">
             <span className="online-dot" />
-            <span className="profile-copy"><strong>Bem-vindo(a)</strong><small>Paciente</small></span>
-            <span className="avatar">AS</span>
+            <span className="profile-copy"><strong>{user?.nome}</strong><small>Paciente</small></span>
+            <span className="avatar">{user?.nome?.slice(0, 2).toUpperCase() ?? 'P'}</span>
+            <button className="logout-button" onClick={logout} type="button">Sair</button>
           </div>
         </header>
 
@@ -327,19 +479,9 @@ function App() {
               <form className="booking-layout" onSubmit={submitAppointment}>
                 <div className="booking-form card">
                   <div className="form-section-title"><span className="step-number">01</span><div><h2>Dados do paciente</h2><p>Como podemos entrar em contato?</p></div></div>
-                  <div className="form-grid">
-                    <label className="field full-field">
-                      <span>Nome completo</span>
-                      <input autoComplete="name" required maxLength={120} value={form.paciente} onChange={(event) => updateForm('paciente', event.target.value)} placeholder="Digite seu nome completo" />
-                    </label>
-                    <label className="field">
-                      <span>Telefone</span>
-                      <input autoComplete="tel" required maxLength={30} value={form.telefone} onChange={(event) => updateForm('telefone', event.target.value)} placeholder="(11) 99999-9999" />
-                    </label>
-                    <label className="field">
-                      <span>E-mail</span>
-                      <input autoComplete="email" type="email" required maxLength={254} value={form.email} onChange={(event) => updateForm('email', event.target.value)} placeholder="voce@email.com" />
-                    </label>
+                  <div className="account-summary">
+                    <strong>{user?.nome}</strong>
+                    <span>{user?.telefone} · {user?.email}</span>
                   </div>
 
                   <div className="form-divider" />
@@ -405,12 +547,12 @@ function App() {
           ) : page === 'agendamentos' ? (
             <section>
               <div className="page-heading">
-                <div><p className="eyebrow">ORGANIZE SEU CUIDADO</p><h1>Agendamentos</h1><p className="page-subtitle">Acompanhe e gerencie as consultas cadastradas.</p></div>
+                <div><p className="eyebrow">ORGANIZE SEU CUIDADO</p><h1>Meus agendamentos</h1><p className="page-subtitle">Acompanhe e gerencie suas consultas.</p></div>
                 <button className="button button-primary" onClick={openBooking}><Icon name="plus" size={17} /> Nova consulta</button>
               </div>
               <div className="appointments-card card">
                 <div className="table-toolbar">
-                  <div><h2>Todas as consultas</h2><p>{appointments.length} {appointments.length === 1 ? 'agendamento' : 'agendamentos'}</p></div>
+                  <div><h2>Suas consultas</h2><p>{appointments.length} {appointments.length === 1 ? 'agendamento' : 'agendamentos'}</p></div>
                   <label className="search-field"><Icon name="search" size={18} /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Buscar consulta..." aria-label="Buscar agendamento" /></label>
                 </div>
                 {filteredAppointments.length ? (
