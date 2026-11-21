@@ -628,14 +628,6 @@ function App() {
                   )}
                 </section>
 
-                <aside className="care-card">
-                  <span className="care-icon"><Icon name="users" size={21} /></span>
-                  <p className="eyebrow">ESTAMOS AQUI POR VOCÊ</p>
-                  <h3>Conte com nossa equipe</h3>
-                  <p>Em caso de dúvidas, estamos prontos para ajudar.</p>
-                  <a href="tel:+551124001234"><Icon name="phone" size={16} /> (11) 2400-1234</a>
-                  <a href="mailto:atendimento@hospitaladriana.com.br"><Icon name="mail" size={16} /> Fale conosco</a>
-                </aside>
               </div>
               <footer className="page-footer">Hospital Adriana Soares <span>•</span> Cuidar de você é a nossa prioridade.</footer>
             </section>
